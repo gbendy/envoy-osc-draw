@@ -57,8 +57,10 @@ def main(argv):
   if frames < pool_size:
     pool_size = frames;
     count = 1
+  elif frames % pool_size == 0:
+    count = frames // pool_size
   else:
-    count = math.floor(frames / pool_size) + 1
+    count = frames // pool_size + 1
   jobs = []
   for f in range(0, pool_size):
     start = f*count
