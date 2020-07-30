@@ -5,6 +5,7 @@ import os
 import multiprocessing
 import time
 import traceback
+import argparse
 
 from sequence import Sequence
 
@@ -19,22 +20,39 @@ def run(args):
     print(traceback.format_exc())
     return    
 
+def get_argparser():
+  parser = argparse.ArgumentParser()
+  parser.add_argument('--clean', '-c', action='store_true', help='Delete old pngs')
+  parser.add_argument('json', nargs='?', help='The render.json file to read')
+  parser.add_argument('--single-process', '-s', action='store_true', help='Run without parallelism - good for debugging')
+  return parser
+
 def main(argv):
+  parser = get_argparser()
+  options = parser.parse_args()
+
   start_time = time.time()
 
-  if len(argv) == 0:
-    print('usage: {} render.json'.format(sys.argv[0]))
-    print('or: {} clean'.format(sys.argv[0]))
+  if options.clean:
+    print ("Cleaning old pngs...", end="")
+    os.system("rm *.png")
+    print (" Done")
+    if not options.json:
+      return 0
+
+  if not options.json:
+    print("No render.json supplied")
+    print(parser.format_usage())
     return 1
 
-  if argv[0] == 'clean':
-    os.system("rm *.png")
-    return 0
-  
-  with open(argv[0]) as f:
+  with open(options.json) as f:
     data = json.load(f)
 
-  pool_size = os.cpu_count()*2
+  if options.single_process:
+    pool_size = 1
+  else:
+    pool_size = os.cpu_count()*2
+
   frames = data['frames']
   if frames < pool_size:
     pool_size = frames;
@@ -46,17 +64,20 @@ def main(argv):
     start = f*count
     end = start + count
     jobs.append([data,start,end if end < frames else frames ])
-  
-  pool = multiprocessing.Pool(pool_size)
-  try:
-    pool.map(run, jobs)
-    pool.close()
-    pool.join()
-  except KeyboardInterrupt:
-    # Allow ^C to interrupt from any thread.
-    print("Caught KeyboardInterrupt, terminating workers")
-    pool.terminate()    
- 
+
+  if pool_size == 1:
+    run(jobs[0])
+  else:
+    pool = multiprocessing.Pool(pool_size)
+    try:
+      pool.map(run, jobs)
+      pool.close()
+      pool.join()
+    except KeyboardInterrupt:
+      # Allow ^C to interrupt from any thread.
+      print("Caught KeyboardInterrupt, terminating workers")
+      pool.terminate()
+
    #Sequence(data).render()
   print("--- {} seconds ---" .format(time.time() - start_time))
 
