@@ -24,7 +24,12 @@ def main(argv):
 
   if len(argv) == 0:
     print('usage: {} render.json'.format(sys.argv[0]))
+    print('or: {} clean'.format(sys.argv[0]))
     return 1
+
+  if argv[0] == 'clean':
+    os.system("rm *.png")
+    return 0
   
   with open(argv[0]) as f:
     data = json.load(f)
