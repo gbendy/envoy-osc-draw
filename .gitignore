@@ -1,0 +1,13 @@
+.*.swp
+
+*.png
+
+*.pyc
+
+\~$*
+
+.idea/*
+.idea/**/*
+
+venv/*
+venv/**/*
