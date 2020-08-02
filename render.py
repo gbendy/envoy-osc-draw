@@ -35,28 +35,6 @@ render = {
 					"width": "3px"				
 				}
 			],
-			"trigs_": [
-				{
-					"method": "sin",
-					"colour": [ 66, 219, 112 ],
-					"start": [ 0, 0.5 ],
-					"length": 1,
-					"period": 1,
-					"amplitude": 0.25,
-					"offset": 0,
-					"width": "1.5px"
-				},
-				{
-					"method": "cos",
-					"colour": [ 66, 219, 112 ],
-					"start": [ 0, 0.5 ],
-					"length": 1,
-					"period": 1,
-					"amplitude": 0.5,
-					"offset": 0.3,
-					"width": "1.5px"
-				}
-			]
 		}
 	},
 	"anims": {

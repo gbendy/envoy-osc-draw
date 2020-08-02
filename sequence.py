@@ -25,6 +25,12 @@ class Sequence:
 
     self.layers = data['layers']
 
+    if self.stills is None:
+      for lyr in self.layers:
+        if not lyr.get("disable", False):
+          # Cache the still image already.
+          pass
+
   def draw(self, frame, stills):
     base_img = Image.new('RGBA',self.resolution,(0,0,0,0))
     locals = {
@@ -35,14 +41,20 @@ class Sequence:
     for layer in self.layers:
       if layer.get('disable',False) == False:
         if layer['type'] == 'still':
-          l = stills.get(layer['still'],None)
-          if l == None:
-            raise "Still layer {} unknown".format(layer['still'])
+          l = layer['still']
+          if isinstance(l, str):
+            l = stills.get(l, None)
+            if l == None:
+              raise "Still layer {} unknown".format(layer['still'])
+          elif isinstance(l, dict):
+            l = Still(l)
           layer_img = l.copy()
         elif layer['type'] == 'anim':
-          l = self.anims.get(layer['anim'],None)
-          if l == None:
-            raise "Anim layer {} unknown".format(layer['anim'])
+          l = layer['anim']
+          if isinstance(l, str):
+            l = self.anims.get(layer['anim'],None)
+            if l == None:
+              raise "Anim layer {} unknown".format(layer['anim'])
           layer_img = Image.new('RGBA',self.resolution,(0,0,0,0))
           l.draw(layer_img,locals)
 
