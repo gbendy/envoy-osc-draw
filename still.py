@@ -20,6 +20,7 @@ class Still:
                         1, 2, 4, 2, 1,
                         0, 1, 2, 1, 0 ]
     self.glow_kernelsum = sum(self.glow_kernel)
+    self._cache = None
 
   def do_draw(self,drawer,image,draw,adraw,locals):
     if drawer.glow:
@@ -47,3 +48,16 @@ class Still:
         image.save('bb{}.png'.format(i))
         i=i+1
         #trig.draw(image,draw,adraw,locals)
+
+  def cache_image(self, seq):
+    if self._cache is None:
+      im = Image.new('RGBA', seq.resolution, (0, 0, 0, 0))
+      state = {'frame': 0, 'frames': seq.frames, 'frame_p': 0}
+      self.draw(im, state)
+      self._cache= im
+
+  def copy(self):
+    if self._cache is None:
+      return None
+    return self._cache.copy()
+

@@ -1,7 +1,7 @@
 from PIL import Image
 
 from still import Still
-
+from layer import Layer
 
 class Sequence:
   def __init__(self, data):
@@ -23,60 +23,38 @@ class Sequence:
       for name, anim  in data['anims'].items():
         self.anims[name] = Still(anim)
 
-    self.layers = data['layers']
-
-    if self.stills is None:
-      for lyr in self.layers:
-        if not lyr.get("disable", False):
-          # Cache the still image already.
-          pass
+    for lyr in data['layers']:
+      self.layers = [ Layer(lyr, self) for lyr in data['layers'] ]
 
   def draw(self, frame, stills):
-    base_img = Image.new('RGBA',self.resolution,(0,0,0,0))
     locals = {
       'frame': frame,
       'frames': self.frames,
       'frame_p': frame/( 1 if self.frames == 1 else self.frames-1)
     }
+    base_img = None
     for layer in self.layers:
-      if layer.get('disable',False) == False:
-        if layer['type'] == 'still':
-          l = layer['still']
-          if isinstance(l, str):
-            l = stills.get(l, None)
-            if l == None:
-              raise "Still layer {} unknown".format(layer['still'])
-          elif isinstance(l, dict):
-            l = Still(l)
-          layer_img = l.copy()
-        elif layer['type'] == 'anim':
-          l = layer['anim']
-          if isinstance(l, str):
-            l = self.anims.get(layer['anim'],None)
-            if l == None:
-              raise "Anim layer {} unknown".format(layer['anim'])
+      if layer.active:
+        if layer.is_still:
+          layer_img = layer.still.copy()
+        elif layer.is_anim:
           layer_img = Image.new('RGBA',self.resolution,(0,0,0,0))
-          l.draw(layer_img,locals)
-
-        mode = layer.get('mode','copy')
-        if mode == 'copy':
+          layer.still.draw(layer_img,locals)
+        if layer.copy_layer:
           base_img = layer_img
-        elif mode == 'alpha':
+        elif layer.alpha_layer:
+          if base_img is None:
+            base_img = Image.new('RGBA', self.resolution, (0, 0, 0, 0))
           base_img = Image.alpha_composite(base_img,layer_img)
     return base_img
 
   def render(self,first,last):
     stills = {}
-    if self.stills != None:
-      locals = {
-        'frame': 0,
-        'frames': self.frames,
-        'frame_p': 0
-      }
-      for name, still in self.stills.items():
-        im = Image.new('RGBA',self.resolution,(0,0,0,0))
-        still.draw(im,locals)
-        stills[name] = im
+    locals = {
+      'frame': 0,
+      'frames': self.frames,
+      'frame_p': 0
+    }
     first = 0 if first == None else first
     last = self.frames if last == None else last
     count = last-first

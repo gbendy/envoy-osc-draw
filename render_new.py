@@ -219,7 +219,7 @@ render = {
 			"mode": "alpha"
 		},
 		{
-			"disable": True,
+			"disable": False,
 			"type": "still",
 			"still": grids,
 			"mode": "alpha"
