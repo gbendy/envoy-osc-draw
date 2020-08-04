@@ -70,6 +70,7 @@ sinewaves_new = {
 def expanding_centre_throb_pts(state):
 	delta = animate_keyvals((
 		(0, 0.0),
+		(1, 0.003),
 		(5, 0.01),
 		(20, 0.003),
 		(40, 0.0)
@@ -113,8 +114,8 @@ starting_throb = {
 			"width": animator_keyvals((
 				(0, 1.0),
 				(5, 30.0),
-				(20, 10.0),
-				(40, 4.0)
+				(20, 1.0),
+				(40, 1.0)
 			)),
 			"glow": True,
 			"glow_scale": animator_keyvals((
@@ -132,8 +133,8 @@ starting_throb = {
 			"width": animator_keyvals((
 				(0, 1.0),
 				(5, 30.0),
-				(20, 10.0),
-				(40, 4.0)
+				(20, 1.0),
+				(40, 1.0)
 			)),
 			"glow": True,
 			"glow_scale": animator_keyvals((
@@ -153,7 +154,7 @@ def expanding_centre_pts(state):
 	delta = animate_keyvals((
 		(0, 0.0),
 		(5, 0.01),
-		(40, 0.5)
+		(25, 0.5)
 	), state)
 	return (
 		(0.5-delta, 0.5),

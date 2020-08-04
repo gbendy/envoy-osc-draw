@@ -36,7 +36,9 @@ def run(args, data=None):
 def get_argparser():
   parser = argparse.ArgumentParser()
   parser.add_argument('--clean', '-c', action='store_true', help='Delete old pngs')
+  parser.add_argument('--out', '-o', type=str, help='Prefix of pngs. defaults to "out"', default="out")
   parser.add_argument('--python', '-p', type=str, help='The path of the python render object to render')
+  parser.add_argument('--ffmpeg', '-m', action='store_true', help='compile output pngs to mp4 via ffmpeg')
   parser.add_argument('--single-process', '-s', action='store_true', help='Run without parallelism - good for debugging')
   return parser
 
@@ -48,9 +50,13 @@ def main(argv):
 
   if options.clean:
     print ("Cleaning old pngs...", end="")
-    os.system("rm *.png")
+    os.system(f"rm {options.out}*.png")
+    if options.ffmpeg:
+      print("Cleaning old movie file...", end="")
+      os.system(f"rm {options.out}_movie.mp4")
+
     print (" Done")
-    if not options.python:
+    if not options.python or not options.ffmpeg:
       return 0
 
   if options.python:
@@ -58,40 +64,43 @@ def main(argv):
     if data is None:
       return 1
 
-  if options.single_process:
-    pool_size = 1
-  else:
-    pool_size = os.cpu_count()*2
+    if options.single_process:
+      pool_size = 1
+    else:
+      pool_size = os.cpu_count()*2
 
-  frames = data['frames']
-  if frames < pool_size:
-    pool_size = frames;
-    count = 1
-  elif frames % pool_size == 0:
-    count = frames // pool_size
-  else:
-    count = frames // pool_size + 1
-  jobs = []
-  for f in range(0, pool_size):
-    start = f*count
-    end = start + count
-    jobs.append([options.python,start,end if end < frames else frames ])
+    frames = data['frames']
+    if frames < pool_size:
+      pool_size = frames;
+      count = 1
+    elif frames % pool_size == 0:
+      count = frames // pool_size
+    else:
+      count = frames // pool_size + 1
+    jobs = []
+    for f in range(0, pool_size):
+      start = f*count
+      end = start + count
+      jobs.append([options.python,start,end if end < frames else frames ])
 
-  if pool_size == 1:
-    run(jobs[0], data=data)
-  else:
-    pool = multiprocessing.Pool(pool_size)
-    try:
-      pool.map(run, jobs)
-      pool.close()
-      pool.join()
-    except KeyboardInterrupt:
-      # Allow ^C to interrupt from any thread.
-      print("Caught KeyboardInterrupt, terminating workers")
-      pool.terminate()
+    if pool_size == 1:
+      run(jobs[0], data=data)
+    else:
+      pool = multiprocessing.Pool(pool_size)
+      try:
+        pool.map(run, jobs)
+        pool.close()
+        pool.join()
+      except KeyboardInterrupt:
+        # Allow ^C to interrupt from any thread.
+        print("Caught KeyboardInterrupt, terminating workers")
+        pool.terminate()
 
-   #Sequence(data).render()
-  print("--- {} seconds ---" .format(time.time() - start_time))
+    #Sequence(data).render()
+    print("--- {} seconds ---" .format(time.time() - start_time))
+
+  if options.ffmpeg:
+    os.system(f"ffmpeg -r 25 -f image2 -s 1920x1080 -i {options.out}_%05d.png -vcodec libx264 -crf 15 -pix_fmt yuv420p {options.out}_movie.mp4")
 
 if '__main__' == __name__:
   sys.exit(main(sys.argv[1:]))
