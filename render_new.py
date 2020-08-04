@@ -76,9 +76,13 @@ def expanding_centre_throb_pts(state):
 	), state)
 	return (
 		(0.5 - delta, 0.499999),
+		(0.5 - delta*2/5, 0.5-delta*2/5),
 		(0.5, 0.5-delta/2),
-		(0.5+delta, 0.5),
+		(0.5 + delta*2/5, 0.5-delta*2/5),
+		(0.5 + delta, 0.5),
+		(0.5 + delta*2/5, 0.5+delta*2/5),
 		(0.5, 0.5 + delta / 2),
+		(0.5 - delta*2/5, 0.5+delta*2/5),
 		(0.5 - delta, 0.500001),
 	)
 
@@ -92,9 +96,13 @@ def expanding_centre_throb_pts_flip(state):
 	), state)
 	return (
 		(0.5 + delta, 0.499999),
+		(0.5 + delta*2/5, 0.5-delta*2/5),
 		(0.5, 0.5-delta/2),
-		(0.5-delta, 0.5),
+		(0.5 - delta*2/5, 0.5-delta*2/5),
+		(0.5 - delta, 0.5),
+		(0.5 - delta*2/5, 0.5+delta*2/5),
 		(0.5, 0.5 + delta / 2),
+		(0.5 + delta*2/5, 0.5+delta*2/5),
 		(0.5 + delta, 0.500001),
 	)
 
@@ -103,7 +111,7 @@ starting_throb = {
 		{
 			"colour": [66, 255, 112],
 			"width": animator_keyvals((
-				(0, 10.0),
+				(0, 1.0),
 				(5, 30.0),
 				(20, 10.0),
 				(40, 4.0)
@@ -122,7 +130,7 @@ starting_throb = {
 		{
 			"colour": [66, 255, 112],
 			"width": animator_keyvals((
-				(0, 10.0),
+				(0, 1.0),
 				(5, 30.0),
 				(20, 10.0),
 				(40, 4.0)
@@ -241,7 +249,7 @@ sinewaves2 = {
 	]
 }
 
-render = {
+another_bit = {
 	"resolution" : [ 1920, 1080 ],
 	"frames": 50,
 	"output": {
@@ -286,3 +294,33 @@ render = {
 		}
 	]
 }
+
+start_throb = {
+	"resolution" : [ 1920, 1080 ],
+	"frames": 50,
+	"output": {
+		"basename": "out_",
+		"extname": "png",
+		"width": 5,
+		"format": "PNG"
+	},
+	"layers": [
+		{
+			"type": "still",
+			"still": background,
+			"mode": "copy"
+		},
+		{
+			"type": "anim",
+			"anim": starting_throb,
+			"mode": "alpha"
+		},
+		{
+			"type": "anim",
+			"anim": expanding_line,
+			"mode": "alpha"
+		}
+	]
+}
+
+render = start_throb
