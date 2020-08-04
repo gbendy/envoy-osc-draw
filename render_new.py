@@ -1,104 +1,27 @@
+import math
+
+from utils import animate_keyvals, animator_keyvals
+
 background = {"background": [0,0,0,128]}
 grids = {
 	"lines": [
 		{
-			"colour": [16, 36, 84, 200],
-			"points": [[0.1, 0], [0.1, 1]],
+			"colour": [16, 36, 84, 150],
+			"points": [[x, 0], [x, 1]],
 			"width": "2px",
-			"curve": False,
-			"close": False
-		},
-		{
-			"colour": [16, 36, 84, 200],
-			"points": [[0.2, 0], [0.2, 1]],
-			"width": "2px",
-			"curve": False,
-			"close": False
-		},
-		{
-			"colour": [16, 36, 84, 200],
-			"points": [[0.3, 0], [0.3, 1]],
-			"width": "2px",
-			"curve": False,
-			"close": False
-		},
-		{
-			"colour": [16, 36, 84, 200],
-			"points": [[0.4, 0], [0.4, 1]],
-			"width": "2px",
-			"curve": False,
-			"close": False
-		},
-		{
-			"colour": [16, 36, 84, 200],
-			"points": [[0.5, 0], [0.5, 1]],
-			"width": "2px",
-			"curve": False,
-			"close": False
-		},
-		{
-			"colour": [16, 36, 84, 200],
-			"points": [[0.6, 0], [0.6, 1]],
-			"width": "2px",
-			"curve": False,
-			"close": False
-		},
-		{
-			"colour": [16, 36, 84, 200],
-			"points": [[0.7, 0], [0.7, 1]],
-			"width": "2px",
-			"curve": False,
-			"close": False
-		},
-		{
-			"colour": [16, 36, 84, 200],
-			"points": [[0.8, 1], [0.8, 0]],
-			"width": "5px",
-			"curve": False,
-			"close": False
-		},
-		{
-			"colour": [16, 36, 84, 200],
-			"points": [[0.9, 1], [0.9, 0]],
-			"width": "5px",
-			"curve": False,
-			"close": False
-		},
-		{
-			"colour": [16, 36, 84, 200],
-			"points": [[0, 0.5], [1, 0.5]],
-			"width": "5px",
-			"curve": False,
-			"close": False
-		},
-		{
-			"colour": [16, 36, 84, 200],
-			"points": [[0, 0.67777], [1, 0.67777]],
-			"width": "5px",
-			"curve": False,
-			"close": False
-		},
-		{
-			"colour": [16, 36, 84, 200],
-			"points": [[0, 0.32222], [1, 0.32222]],
-			"width": "5px",
-			"curve": False,
-			"close": False
-		},
-		{
-			"colour": [16, 36, 84, 200],
-			"points": [[0, 0.8555], [1, 0.8555]],
-			"width": "5px",
-			"curve": False,
-			"close": False
-		},
-		{
-			"colour": [16, 36, 84, 200],
-			"points": [[0, 0.1444], [1, 0.144]],
-			"width": "5px",
 			"curve": False,
 			"close": False
 		}
+		for x in (0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9)
+	] + [
+		{
+			"colour": [16, 36, 84, 150],
+			"points": [[0, x], [1, x]],
+			"width": "2px",
+			"curve": False,
+			"close": False
+		}
+		for x in [0.5, 0.67777, 0.32222, 0.8555, 0.1444 ]
 	]
 }
 
@@ -117,6 +40,132 @@ grid2 = {
 	],
 }
 
+def sine_callback(x, resolution, state, phase, period, amplitude):
+	# period of 1.0 = 1 screen width
+	period *= resolution[0]
+	phase *= period
+	# Amplitude of 1.0 = full screen height
+	amplitude *= resolution[1]
+	return math.sin(2 * math.pi * (x + phase) / period) * amplitude
+
+sinewaves_new = {
+	"functions": [
+		{
+			# "origin": [0, 0.5],
+			"function": sine_callback,
+			"parameters": {
+				"period": 1,
+				"phase": lambda state: state["frame_p"],
+				"amplitude": 0.25,
+			},
+			"colour": [66, 255, 112],
+			"width": "4px",
+			"glow": True,
+			"glow_scale": 9,
+			"glow_color": [66, 219, 112]
+		}
+	]
+}
+
+def expanding_centre_throb_pts(state):
+	delta = animate_keyvals((
+		(0, 0.0),
+		(5, 0.01),
+		(20, 0.003),
+		(40, 0.0)
+	), state)
+	return (
+		(0.5 - delta, 0.499999),
+		(0.5, 0.5-delta/2),
+		(0.5+delta, 0.5),
+		(0.5, 0.5 + delta / 2),
+		(0.5 - delta, 0.500001),
+	)
+
+def expanding_centre_throb_pts_flip(state):
+	delta = animate_keyvals((
+		(0, 0.0),
+		(1, 0.003),
+		(5, 0.01),
+		(20, 0.003),
+		(40, 0.0)
+	), state)
+	return (
+		(0.5 + delta, 0.499999),
+		(0.5, 0.5-delta/2),
+		(0.5-delta, 0.5),
+		(0.5, 0.5 + delta / 2),
+		(0.5 + delta, 0.500001),
+	)
+
+starting_throb = {
+	"lines": [
+		{
+			"colour": [66, 255, 112],
+			"width": animator_keyvals((
+				(0, 10.0),
+				(5, 30.0),
+				(20, 10.0),
+				(40, 4.0)
+			)),
+			"glow": True,
+			"glow_scale": animator_keyvals((
+				(0, 0.0),
+				(5, 50.0),
+				(20, 20.0),
+				(40, 8.0)
+			)),
+			"glow_color": [66, 255, 112],
+			"points": expanding_centre_throb_pts,
+			"close": False,
+		},
+		{
+			"colour": [66, 255, 112],
+			"width": animator_keyvals((
+				(0, 10.0),
+				(5, 30.0),
+				(20, 10.0),
+				(40, 4.0)
+			)),
+			"glow": True,
+			"glow_scale": animator_keyvals((
+				(0, 0.0),
+				(5, 50.0),
+				(20, 20.0),
+				(40, 8.0)
+			)),
+			"glow_color": [66, 255, 112],
+			"points": expanding_centre_throb_pts_flip,
+			"close": False,
+		},
+	],
+}
+
+def expanding_centre_pts(state):
+	delta = animate_keyvals((
+		(0, 0.0),
+		(5, 0.01),
+		(40, 0.5)
+	), state)
+	return (
+		(0.5-delta, 0.5),
+		(0.5+delta, 0.5),
+	)
+
+expanding_line = {
+	"lines": [
+		{
+			"colour": [66, 255, 112],
+			"width": 4.0,
+			"glow": True,
+			"glow_scale": 10.0,
+			"glow_color": [66, 219, 112],
+			"points": expanding_centre_pts,
+			"close": False
+		}
+	]
+}
+
 sinewaves = {
 	"trigs": [
 		{
@@ -129,7 +178,7 @@ sinewaves = {
 			"offset": "frame_p * 100%",
 			"width": "4px",
 			"glow": True,
-			"glow_scale": 0.6,
+			"glow_scale": 9,
 			"glow_color": [66, 219, 112]
 		},
 		{
@@ -142,7 +191,7 @@ sinewaves = {
 			"offset": "frame_p * 100%",
 			"width": "2px",
 			"glow": False,
-			"glow_scale": 0.6,
+			"glow_scale": 9,
 			"glow_color": [66, 219, 112]
 		}
 	],
@@ -160,7 +209,7 @@ sinewaves2 = {
 			"offset": "frame_p * 100%",
 			"width": "2px",
 			"glow": True,
-			"glow_scale": 0.6,
+			"glow_scale": 9,
 			"glow_color": [0, 255, 0]
 		},
 		{
@@ -173,7 +222,7 @@ sinewaves2 = {
 			"offset": "-frame_p * 100%",
 			"width": "1.5px",
 			"glow": True,
-			"glow_scale": 0.4,
+			"glow_scale": 9,
 			"glow_color": [0, 255, 0]
 		},
 		{
@@ -186,7 +235,7 @@ sinewaves2 = {
 			"offset": "frame_p * 50%",
 			"width": "2px",
 			"glow": True,
-			"glow_scale": 0.6,
+			"glow_scale": 9,
 			"glow_color": [0, 255, 0]
 		}
 	]
@@ -194,7 +243,7 @@ sinewaves2 = {
 
 render = {
 	"resolution" : [ 1920, 1080 ],
-	"frames": 5,
+	"frames": 50,
 	"output": {
 		"basename": "out_",
 		"extname": "png",
@@ -214,12 +263,23 @@ render = {
 			"mode": "alpha"
 		},
 		{
+			"disable": True,
 			"type": "anim",
-			"anim": sinewaves,
+			"anim": sinewaves_new,
 			"mode": "alpha"
 		},
 		{
-			"disable": False,
+			"type": "anim",
+			"anim": starting_throb,
+			"mode": "alpha"
+		},
+		{
+			"type": "anim",
+			"anim": expanding_line,
+			"mode": "alpha"
+		},
+		{
+			"disable": True,
 			"type": "still",
 			"still": grids,
 			"mode": "alpha"

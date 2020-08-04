@@ -28,7 +28,7 @@ class Layer:
             if isinstance(l, str):
                 l = self.seq.anims[l]
         if isinstance(l, dict):
-            l = Still(l)
+            l = Still(l, seq.resolution)
         # else assume is a Still already.
         self.still = l
 

@@ -15,18 +15,18 @@ class Sequence:
     if 'stills' in data:
       self.stills = {}
       for name, still  in data['stills'].items():
-        self.stills[name] = Still(still)
+        self.stills[name] = Still(still, resolution=self.resolution)
 
     self.anims = None
     if 'anims' in data:
       self.anims = {}
       for name, anim  in data['anims'].items():
-        self.anims[name] = Still(anim)
+        self.anims[name] = Still(anim, resolution=self.resolution)
 
     for lyr in data['layers']:
       self.layers = [ Layer(lyr, self) for lyr in data['layers'] ]
 
-  def draw(self, frame, stills):
+  def draw(self, frame):
     locals = {
       'frame': frame,
       'frames': self.frames,
@@ -49,18 +49,12 @@ class Sequence:
     return base_img
 
   def render(self,first,last):
-    stills = {}
-    locals = {
-      'frame': 0,
-      'frames': self.frames,
-      'frame_p': 0
-    }
-    first = 0 if first == None else first
-    last = self.frames if last == None else last
+    first = 0 if first is None else first
+    last = self.frames if last is None else last
     count = last-first
     for f in range(first,last):
       print('{}/{}'.format(f+1-first,count))
-      self.save_image(self.draw(f,stills),f)
+      self.save_image(self.draw(f),f)
 
 
   def save_image(self, im, frame):
