@@ -1,6 +1,6 @@
 {
 	"resolution" : [ 1920, 1080 ],
-	"frames": 1,
+	"frames": 5,
 	"output": {
 		"basename": "out_",
 		"extname": "png",
